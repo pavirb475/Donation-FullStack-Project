@@ -5,9 +5,12 @@ import { AuthContext } from '../context/AuthContext';
 const DonateModal = ({ campaign, onClose }) => {
   const { user } = useContext(AuthContext);
   const [amount, setAmount] = useState('');
+  const [customAmount, setCustomAmount] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1); // 1: Amount, 2: Processing, 3: Success, 4: Error
+  const [step, setStep] = useState(1); 
   const [errorMsg, setErrorMsg] = useState('');
+
+  const presetAmounts = [10, 50, 100, 200, 500];
 
   const handleDonate = async (e) => {
     e.preventDefault();
@@ -23,16 +26,13 @@ const DonateModal = ({ campaign, onClose }) => {
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
       
-      // 1. Create order
       const { data } = await axios.post('http://localhost:5001/api/donations/create-order', {
         campaignId: campaign._id,
         amount: Number(amount)
       }, config);
 
-      // Simulate payment gateway delay
       setTimeout(async () => {
         try {
-          // 2. Verify donation
           await axios.post('http://localhost:5001/api/donations/verify', {
             paymentIntentId: data.orderId,
             campaignId: campaign._id,
@@ -53,55 +53,89 @@ const DonateModal = ({ campaign, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden">
         
         {/* Header */}
-        <div className="bg-blue-600 p-4 text-white flex justify-between items-center">
-          <h3 className="text-xl font-bold">Donate to Campaign</h3>
-          <button onClick={onClose} className="text-white hover:text-gray-200 text-2xl font-bold">&times;</button>
+        <div className="bg-[#4b3b8c] p-5 text-white flex justify-between items-center">
+          <div>
+            <p className="text-sm text-indigo-200">You can help us for our</p>
+            <h3 className="text-2xl font-bold">Campaign</h3>
+          </div>
+          <button onClick={onClose} className="text-white hover:text-gray-300 text-3xl font-bold">&times;</button>
         </div>
 
         {/* Body */}
-        <div className="p-6">
+        <div className="p-8">
           <div className="mb-6">
-            <h4 className="font-bold text-gray-900 truncate">{campaign.title}</h4>
-            <p className="text-sm text-gray-500">You are making a difference today.</p>
+            <h4 className="text-xl font-bold text-gray-900 mb-2">{campaign.title}</h4>
+            <p className="text-sm text-gray-500 line-clamp-2">{campaign.description}</p>
+          </div>
+
+          <div className="mb-6">
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+              <div 
+                className="bg-[#4b3b8c] h-2 rounded-full" 
+                style={{ width: `${Math.min((campaign.raisedAmount / campaign.goalAmount) * 100, 100)}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-sm">
+              <div className="text-gray-500">Raised<br/><span className="text-lg font-bold text-gray-900">${campaign.raisedAmount}</span></div>
+              <div className="text-gray-500 text-right">Goal<br/><span className="text-lg font-bold text-gray-900">${campaign.goalAmount}</span></div>
+            </div>
           </div>
 
           {step === 1 && (
             <form onSubmit={handleDonate}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Donation Amount (USD)</label>
-                <div className="relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 sm:text-sm">$</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md py-3 border"
-                    placeholder="0.00"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                  />
-                </div>
+              <div className="mb-6 flex items-center border border-gray-300 rounded-md overflow-hidden shadow-sm">
+                <div className="bg-[#4b3b8c] text-white px-6 py-3 font-bold text-xl">$</div>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  className="w-full py-3 px-4 focus:outline-none text-xl font-bold text-gray-900"
+                  placeholder="0"
+                  value={amount}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    setCustomAmount(true);
+                  }}
+                />
               </div>
+
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                {presetAmounts.map(preset => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => { setAmount(preset); setCustomAmount(false); }}
+                    className={`py-2 border rounded-md font-bold transition-all ${amount == preset && !customAmount ? 'border-[#4b3b8c] bg-indigo-50 text-[#4b3b8c]' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                  >
+                    ${preset}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setCustomAmount(true)}
+                  className={`py-2 border rounded-md font-bold transition-all ${customAmount ? 'border-[#4b3b8c] bg-indigo-50 text-[#4b3b8c]' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                >
+                  Custom
+                </button>
+              </div>
+
               <button 
                 type="submit" 
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-bold hover:bg-blue-700 transition"
+                className="w-full bg-[#4b3b8c] text-white py-4 px-4 rounded-md font-bold text-lg hover:bg-indigo-900 transition shadow-lg"
               >
-                Proceed to Payment
+                Donate Now
               </button>
             </form>
           )}
 
           {step === 2 && (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4b3b8c] mx-auto mb-4"></div>
               <p className="text-gray-600 font-medium">Processing your secure payment...</p>
-              <p className="text-xs text-gray-400 mt-2">Mocking Payment Gateway</p>
             </div>
           )}
 
