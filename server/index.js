@@ -17,6 +17,7 @@ import campaignRoutes from './routes/campaignRoutes.js';
 import donationRoutes from './routes/donationRoutes.js';
 import volunteerRoutes from './routes/volunteerRoutes.js';
 import recommendationRoutes from './routes/recommendationRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -24,6 +25,7 @@ app.use('/api/campaigns', campaignRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/volunteer', volunteerRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');

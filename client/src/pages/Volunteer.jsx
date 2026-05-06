@@ -40,13 +40,15 @@ const Volunteer = () => {
     const fetchData = async () => {
       try {
         const campRes = await axios.get('http://localhost:5001/api/campaigns');
-        const formattedCampaigns = campRes.data.map(addMockVolunteerData);
+        // Only show volunteer or combined campaigns
+        const volCampaigns = campRes.data.filter(c => c.campaignType !== 'donation');
+        const formattedCampaigns = volCampaigns.map(addMockVolunteerData);
         setCampaigns(formattedCampaigns);
 
         if (user) {
           const config = { headers: { Authorization: `Bearer ${user.token}` } };
           const recRes = await axios.get('http://localhost:5001/api/recommendations', config).catch(() => ({ data: [] }));
-          setRecommendations(recRes.data.map(addMockVolunteerData));
+          setRecommendations(recRes.data.filter(c => c.campaignType !== 'donation').map(addMockVolunteerData));
         }
         setLoading(false);
       } catch (err) {

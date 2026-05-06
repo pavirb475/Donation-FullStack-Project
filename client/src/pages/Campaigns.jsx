@@ -23,7 +23,9 @@ const Campaigns = () => {
     const fetchData = async () => {
       try {
         const campRes = await axios.get('http://localhost:5001/api/campaigns');
-        setCampaigns(campRes.data);
+        // Only show donation or combined campaigns
+        const donationCampaigns = campRes.data.filter(c => c.campaignType !== 'volunteer');
+        setCampaigns(donationCampaigns);
 
         if (user) {
           const config = { headers: { Authorization: `Bearer ${user.token}` } };
@@ -31,7 +33,7 @@ const Campaigns = () => {
             axios.get('http://localhost:5001/api/recommendations', config).catch(() => ({ data: [] })),
             axios.get('http://localhost:5001/api/donations/me', config).catch(() => ({ data: [] }))
           ]);
-          setRecommendations(recRes.data);
+          setRecommendations(recRes.data.filter(c => c.campaignType !== 'volunteer'));
           setPastDonations(donRes.data);
         }
         setLoading(false);
