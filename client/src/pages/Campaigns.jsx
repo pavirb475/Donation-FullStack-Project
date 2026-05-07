@@ -14,6 +14,8 @@ const Campaigns = () => {
   const [error, setError] = useState(null);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
 
+  const isProfileComplete = user?.skills?.length > 0 || user?.interests?.length > 0 || user?.bloodGroup || user?.experience;
+
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -62,10 +64,10 @@ const Campaigns = () => {
   if (error) return <div className="text-center py-20 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-12">
+    <div className="bg-stone-50 min-h-screen pb-12">
       
       {/* Hero Section matching the uploaded aesthetic */}
-      <section className="relative bg-[#4b3b8c] text-white py-16 lg:py-24 overflow-hidden">
+      <section className="relative bg-orange-700 text-white py-16 lg:py-24 overflow-hidden">
         {/* World map background overlay (using a generic transparent world map pattern) */}
         <div className="absolute inset-0 opacity-10 bg-[url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg')] bg-no-repeat bg-center bg-cover mix-blend-overlay"></div>
         
@@ -74,10 +76,10 @@ const Campaigns = () => {
             <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
               Donations<br/>that change<br/>the world
             </h1>
-            <p className="text-lg text-indigo-200 max-w-lg mb-8">
+            <p className="text-lg text-orange-200 max-w-lg mb-8">
               We've spent the last 5 years helping over 25,000 teams just like yourself create and sustain successful online support.
             </p>
-            <button className="border-2 border-white text-white px-8 py-3 font-bold hover:bg-white hover:text-[#4b3b8c] transition rounded-sm">
+            <button className="border-2 border-white text-white px-8 py-3 font-bold hover:bg-white hover:text-orange-700 transition rounded-sm">
               Learn More
             </button>
           </div>
@@ -90,22 +92,22 @@ const Campaigns = () => {
                 <p className="text-sm text-gray-600 mb-6 line-clamp-2">{featuredCampaign.title} - {featuredCampaign.description}</p>
                 
                 <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                  <div className="bg-[#4b3b8c] h-3 rounded-full" style={{ width: `${Math.min((featuredCampaign.raisedAmount / featuredCampaign.goalAmount) * 100, 100)}%` }}></div>
+                  <div className="bg-orange-600 h-3 rounded-full" style={{ width: `${Math.min((featuredCampaign.raisedAmount / featuredCampaign.goalAmount) * 100, 100)}%` }}></div>
                 </div>
                 <div className="flex justify-between mb-6">
                   <div>
                     <p className="text-xs text-gray-500 uppercase">Raised</p>
-                    <p className="font-bold text-lg">${featuredCampaign.raisedAmount}</p>
+                    <p className="font-bold text-lg">₹{featuredCampaign.raisedAmount}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-gray-500 uppercase">Goal</p>
-                    <p className="font-bold text-lg">${featuredCampaign.goalAmount}</p>
+                    <p className="font-bold text-lg">₹{featuredCampaign.goalAmount}</p>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => setSelectedCampaign(featuredCampaign)}
-                  className="w-full bg-[#4b3b8c] text-white py-4 rounded font-bold hover:bg-indigo-900 transition"
+                  className="w-full bg-orange-700 text-white py-4 rounded font-bold hover:bg-orange-900 transition"
                 >
                   Donate Now
                 </button>
@@ -121,7 +123,7 @@ const Campaigns = () => {
         {user && pastDonations.length > 0 && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <span className="bg-green-100 text-green-600 p-2 rounded-full mr-3">🔄</span> 
+              <span className="bg-emerald-100 text-emerald-600 p-2 rounded-full mr-3">🔄</span> 
               Your Past Donations
             </h2>
             <div className="bg-white rounded-xl shadow p-6 border-l-4 border-green-500 overflow-x-auto">
@@ -137,8 +139,8 @@ const Campaigns = () => {
                   {pastDonations.map((d, i) => (
                     <tr key={i}>
                       <td className="py-3 font-medium text-gray-900">{d.campaignId?.title || 'Unknown'}</td>
-                      <td className="py-3 font-bold text-green-600">${d.amount}</td>
-                      <td className="py-3"><span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">{d.status}</span></td>
+                      <td className="py-3 font-bold text-emerald-600">₹{d.amount}</td>
+                      <td className="py-3"><span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full">{d.status}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -148,29 +150,39 @@ const Campaigns = () => {
         )}
 
         {/* AI Recommendations */}
-        {user && recommendations.length > 0 && (
+        {user && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <span className="bg-yellow-100 text-yellow-600 p-2 rounded-full mr-3">✨</span> 
               Recommended For You
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {recommendations.slice(0, 3).map((campaign, i) => (
-                <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden border-t-4 border-yellow-400 p-5 flex flex-col justify-between">
-                  <div>
-                    <div className="text-xs font-bold text-yellow-600 uppercase mb-1">Because you like {campaign.category}</div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">{campaign.title}</h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{campaign.description}</p>
+            
+            {!isProfileComplete ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center text-gray-500">
+                <p>We'd love to suggest campaigns tailored to you! Please complete your profile in the Dashboard to unlock AI recommendations.</p>
+              </div>
+            ) : recommendations.length === 0 ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center text-gray-500">
+                <p>We couldn't find any perfect matches for your unique profile right now. Feel free to scroll down and explore all of our wonderful campaigns!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {recommendations.slice(0, 3).map((campaign, i) => (
+                  <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden border-t-4 border-yellow-400 p-5 flex flex-col justify-between">
+                    <div>
+                      <div className="text-xs font-bold text-yellow-600 uppercase mb-1">{campaign.matchReason}</div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">{campaign.title}</h3>
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{campaign.description}</p>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedCampaign(campaign)}
+                      className="text-orange-700 font-bold text-sm hover:underline text-left"
+                    >
+                      Donate &rarr;
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => setSelectedCampaign(campaign)}
-                    className="text-[#4b3b8c] font-bold text-sm hover:underline text-left"
-                  >
-                    Donate &rarr;
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -181,7 +193,7 @@ const Campaigns = () => {
             <input 
               type="text" 
               placeholder="Search campaigns..." 
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md focus:ring-[#4b3b8c] focus:border-[#4b3b8c]"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md focus:ring-orange-700 focus:border-orange-700"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -189,7 +201,7 @@ const Campaigns = () => {
           <div className="md:w-64 relative">
             <FaTags className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <select 
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md appearance-none focus:ring-[#4b3b8c] focus:border-[#4b3b8c]"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md appearance-none focus:ring-orange-700 focus:border-orange-700"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
             >
@@ -200,7 +212,7 @@ const Campaigns = () => {
           <div className="md:w-64 relative">
             <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <select 
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md appearance-none focus:ring-[#4b3b8c] focus:border-[#4b3b8c]"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md appearance-none focus:ring-orange-700 focus:border-orange-700"
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
             >
@@ -225,11 +237,11 @@ const Campaigns = () => {
                 {campaign.image ? (
                   <img src={campaign.image} alt={campaign.title} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-300">
+                  <div className="w-full h-full flex items-center justify-center bg-orange-50 text-orange-300">
                     <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                   </div>
                 )}
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-[#4b3b8c] shadow-sm">
+                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-orange-700 shadow-sm">
                   {campaign.category}
                 </div>
               </div>
@@ -239,25 +251,25 @@ const Campaigns = () => {
                 
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="font-bold text-[#4b3b8c]">${campaign.raisedAmount} <span className="font-normal text-gray-500 text-xs">raised</span></span>
-                    <span className="text-gray-500 font-medium text-xs">Goal: ${campaign.goalAmount}</span>
+                    <span className="font-bold text-orange-700">₹{campaign.raisedAmount} <span className="font-normal text-gray-500 text-xs">raised</span></span>
+                    <span className="text-gray-500 font-medium text-xs">Goal: ₹{campaign.goalAmount}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className="bg-[#4b3b8c] h-2 rounded-full transition-all duration-500" 
+                      className="bg-orange-700 h-2 rounded-full transition-all duration-500" 
                       style={{ width: `${Math.min((campaign.raisedAmount / campaign.goalAmount) * 100, 100)}%` }}
                     ></div>
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center mt-2 pt-4 border-t border-gray-100">
-                  <span className="text-xs font-medium text-gray-500 flex items-center bg-gray-50 px-2 py-1 rounded">
+                  <span className="text-xs font-medium text-gray-500 flex items-center bg-stone-50 px-2 py-1 rounded">
                     <FaMapMarkerAlt className="mr-1 text-gray-400" />
                     {campaign.location || 'Global'}
                   </span>
                   <button 
                     onClick={() => setSelectedCampaign(campaign)}
-                    className="bg-[#4b3b8c] text-white px-5 py-2 rounded-md font-bold hover:bg-indigo-900 transition shadow-sm text-sm"
+                    className="bg-orange-700 text-white px-5 py-2 rounded-md font-bold hover:bg-orange-900 transition shadow-sm text-sm"
                   >
                     Donate
                   </button>

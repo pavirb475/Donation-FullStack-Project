@@ -5,35 +5,57 @@ export const getRecommendations = async (req, res) => {
     const user = req.user;
     const campaigns = await Campaign.find({ status: 'active' });
 
-    // AI Recommendation Logic (Rule-based)
-    // Inputs: user.skills, user.interests, user.location
-    // Campaign: campaign.category, campaign.location
-
     const scoredCampaigns = campaigns.map(campaign => {
       let score = 0;
+      let reason = '';
 
-      // +2 if interest matches campaign category
-      if (user.interests && user.interests.includes(campaign.category)) {
-        score += 2;
+      // 1. Check Interests (+3)
+      if (user.interests && user.interests.some(interest => 
+        campaign.category.toLowerCase().includes(interest.toLowerCase()) || 
+        interest.toLowerCase().includes(campaign.category.toLowerCase())
+      )) {
+        score += 3;
+        reason = `Matches your interest in ${campaign.category}`;
       }
 
-      // +1 if location matches
+      // 2. Check Skills (+5 - higher weight as it's more specific)
+      if (user.skills && user.skills.length > 0) {
+        const matchedSkill = user.skills.find(skill => 
+          campaign.title.toLowerCase().includes(skill.toLowerCase()) || 
+          campaign.description.toLowerCase().includes(skill.toLowerCase())
+        );
+        if (matchedSkill) {
+          score += 5;
+          reason = `u have ${matchedSkill.toLowerCase()} skills as give`; // Using user's requested phrasing
+        }
+      }
+
+      // 3. Check Location (+1)
       if (user.location && campaign.location && user.location.toLowerCase() === campaign.location.toLowerCase()) {
         score += 1;
+        if (!reason) reason = `Based in ${campaign.location}`;
       }
 
-      // Note: Volunteering skills match could be added here if campaigns had specific required skills
-      // For this implementation, we'll keep it simple with category and location.
+      // Default reason if score is low but we show it
+      if (!reason) {
+        reason = `Explore ${campaign.category} causes`;
+      }
 
-      return { ...campaign.toObject(), matchScore: score };
+      return { ...campaign.toObject(), matchScore: score, matchReason: reason };
     });
 
-    // Sort by score descending and take top 5
-    const recommended = scoredCampaigns
-      .sort((a, b) => b.matchScore - a.matchScore)
-      .slice(0, 5);
+    // Sort by score descending
+    // Filter: only show if score > 0 OR if we have very few campaigns
+    let recommended = scoredCampaigns
+      .sort((a, b) => b.matchScore - a.matchScore);
 
-    res.json(recommended);
+    // If we have strong matches, only show those (score >= 3)
+    const strongMatches = recommended.filter(c => c.matchScore >= 3);
+    if (strongMatches.length >= 2) {
+      recommended = strongMatches;
+    }
+
+    res.json(recommended.slice(0, 5));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

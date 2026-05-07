@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #3b82f6;
-  --color-primary-dark: #2563eb;
-  --color-secondary: #10b981;
-  --color-secondary-dark: #059669;
+  --color-primary: #ea580c;
+  --color-primary-dark: #c2410c;
+  --color-secondary: #d97706;
+  --color-secondary-dark: #b45309;
 }
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f3f4f6;
+  background-color: #fafaf9; /* stone-50, beige-like */
   color: #1f2937;
 }
 

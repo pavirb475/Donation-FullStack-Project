@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+
   const register = async (userData) => {
     try {
       const { data } = await axios.post('http://localhost:5001/api/auth/register', userData);
@@ -37,13 +38,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (userData) => {
+    try {
+      const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      const { data } = await axios.put('http://localhost:5001/api/auth/profile', userData, config);
+      setUser(data);
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Profile update failed' };
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('userInfo');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, updateProfile, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

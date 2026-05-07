@@ -7,6 +7,10 @@ const userSchema = new mongoose.Schema({
   skills: [{ type: String }],
   interests: [{ type: String }],
   location: { type: String },
+  phoneNumber: { type: String },
+  bloodGroup: { type: String },
+  experience: { type: String },
+  resume: { type: String },
   role: { type: String, enum: ['user', 'admin'], default: 'user' }
 }, { timestamps: true });
 

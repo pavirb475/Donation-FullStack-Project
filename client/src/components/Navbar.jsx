@@ -18,19 +18,19 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center text-primary-dark font-bold text-xl">
-              <FaHandHoldingHeart className="mr-2 text-2xl text-blue-600" />
+              <FaHandHoldingHeart className="mr-2 text-2xl text-amber-600" />
               GiveHope
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            <Link to="/campaigns" className="text-gray-700 hover:text-blue-600 font-medium">Campaigns</Link>
-            <Link to="/volunteer" className="text-gray-700 hover:text-blue-600 font-medium">Volunteer</Link>
+            <Link to="/campaigns" className="text-gray-700 hover:text-amber-600 font-medium">Donate</Link>
+            <Link to="/volunteer" className="text-gray-700 hover:text-amber-600 font-medium">Volunteer</Link>
             
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">Dashboard</Link>
+                <Link to="/dashboard" className="text-gray-700 hover:text-amber-600 font-medium">Dashboard</Link>
                 {user.role === 'admin' && (
-                  <Link to="/admin" className="text-gray-700 hover:text-blue-600 font-medium">Admin Panel</Link>
+                  <Link to="/admin" className="text-gray-700 hover:text-amber-600 font-medium">Admin Panel</Link>
                 )}
                 <button
                   onClick={handleLogout}
@@ -41,8 +41,8 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link to="/login" className="text-gray-700 hover:text-blue-600 font-medium">Login</Link>
-                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition shadow-sm">
+                <Link to="/login" className="text-gray-700 hover:text-amber-600 font-medium">Login</Link>
+                <Link to="/register" className="bg-amber-600 text-white px-4 py-2 rounded-md font-medium hover:bg-amber-700 transition shadow-sm">
                   Register
                 </Link>
               </div>

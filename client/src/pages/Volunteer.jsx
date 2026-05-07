@@ -11,6 +11,8 @@ const Volunteer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
+  const isProfileComplete = user?.skills?.length > 0 || user?.interests?.length > 0 || user?.bloodGroup || user?.experience;
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSkill, setSelectedSkill] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
@@ -91,13 +93,13 @@ const Volunteer = () => {
   if (error) return <div className="text-center py-20 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-12">
+    <div className="bg-stone-50 min-h-screen pb-12">
       
       {/* Hero Header */}
-      <section className="bg-teal-700 text-white py-16 px-4">
+      <section className="bg-orange-500 text-white py-16 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Be the Change You Want to See</h1>
-          <p className="text-lg md:text-xl text-teal-100 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-orange-50 max-w-2xl mx-auto">
             Find volunteer opportunities that match your skills. Join hands with NGOs and make a real impact in your community.
           </p>
         </div>
@@ -112,7 +114,7 @@ const Volunteer = () => {
             <input 
               type="text" 
               placeholder="Search by keyword (e.g. teaching, medical)" 
-              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md focus:ring-teal-500 focus:border-teal-500"
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-md focus:ring-orange-500 focus:border-orange-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -153,32 +155,58 @@ const Volunteer = () => {
         </div>
 
         {/* AI Recommendations */}
-        {user && recommendations.length > 0 && (
+        {user && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <span className="bg-yellow-100 text-yellow-600 p-2 rounded-full mr-3">✨</span> 
               Opportunities For You
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recommendations.slice(0, 3).map((opp, index) => (
-                <div key={index} className="bg-white rounded-xl shadow border-t-4 border-yellow-400 p-5 relative">
-                  <div className="absolute -top-3 -right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                    {opp.matchScore}% Match
-                  </div>
-                  <div className="text-xs font-bold text-yellow-600 uppercase mb-2">Because you have "{user.skills?.[0] || opp.requiredSkills[0]}" skill</div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{opp.title}</h3>
-                  <div className="text-sm text-gray-500 mb-4 flex items-center">
-                    <FaMapMarkerAlt className="mr-1" /> {opp.location || 'Global'}
-                  </div>
-                  <button 
-                    onClick={() => setSelectedOpp(opp)}
-                    className="w-full bg-yellow-50 text-yellow-700 font-bold py-2 rounded border border-yellow-200 hover:bg-yellow-100 transition"
-                  >
-                    View Details
-                  </button>
-                </div>
-              ))}
-            </div>
+
+            {!isProfileComplete ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center text-gray-500">
+                <p>We'd love to suggest volunteer roles tailored to your skills! Please complete your profile in the Dashboard to unlock AI recommendations.</p>
+              </div>
+            ) : recommendations.length === 0 ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center text-gray-500">
+                <p>We couldn't find any perfect matches for your unique profile right now. Feel free to scroll down and explore all of our wonderful volunteer opportunities!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recommendations.slice(0, 3).map((opp, index) => {
+                  
+                  // Calculate the true reason for the match to display
+                  const matchingSkills = user.skills?.filter(skill => 
+                    opp.requiredSkills.map(s => s.toLowerCase()).includes(skill.toLowerCase())
+                  );
+                  
+                  let matchReason = '';
+                  if (matchingSkills && matchingSkills.length > 0) {
+                    matchReason = `Because you have "${matchingSkills[0]}" skill`;
+                  } else if (user.interests && user.interests.includes(opp.category)) {
+                    matchReason = `Because you like ${opp.category}`;
+                  } else if (user.location && user.location.toLowerCase() === (opp.location || '').toLowerCase()) {
+                    matchReason = `Because it is in your location`;
+                  } else {
+                    matchReason = `Recommended Opportunity`;
+                  }
+
+                  return (
+                    <div key={index} className="bg-white rounded-xl shadow border-t-4 border-yellow-400 p-5 relative">
+                      <div className="text-xs font-bold text-yellow-600 uppercase mb-2">{matchReason}</div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{opp.title}</h3>
+                      <div className="text-sm text-gray-500 mb-4 flex items-center">
+                        <FaMapMarkerAlt className="mr-1" /> {opp.location || 'Global'}
+                      </div>
+                      <button 
+                        onClick={() => setSelectedOpp(opp)}
+                        className="w-full bg-yellow-50 text-yellow-700 font-bold py-2 rounded border border-yellow-200 hover:bg-yellow-100 transition"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -195,7 +223,7 @@ const Volunteer = () => {
             >
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-bold text-gray-900 line-clamp-2">{opp.title}</h3>
-                <span className={`text-xs font-bold px-2 py-1 rounded ${opp.type === 'Remote' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>
+                <span className={`text-xs font-bold px-2 py-1 rounded ${opp.type === 'Remote' ? 'bg-amber-100 text-amber-700' : 'bg-stone-100 text-gray-700'}`}>
                   {opp.type}
                 </span>
               </div>
@@ -204,22 +232,22 @@ const Volunteer = () => {
               
               <div className="space-y-2 mb-6">
                 <div className="flex items-center text-sm text-gray-500">
-                  <FaMapMarkerAlt className="w-4 h-4 mr-2 text-teal-600" />
+                  <FaMapMarkerAlt className="w-4 h-4 mr-2 text-orange-600" />
                   {opp.location || 'Global'}
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
-                  <FaToolbox className="w-4 h-4 mr-2 text-teal-600" />
+                  <FaToolbox className="w-4 h-4 mr-2 text-orange-600" />
                   <span className="truncate">Skills: {opp.requiredSkills.join(', ')}</span>
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
-                  <svg className="w-4 h-4 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  <svg className="w-4 h-4 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                   Duration: {opp.duration}
                 </div>
               </div>
 
               <button 
                 onClick={() => setSelectedOpp(opp)}
-                className="w-full bg-teal-600 text-white font-bold py-2.5 rounded-md hover:bg-teal-700 transition"
+                className="w-full bg-orange-600 text-white font-bold py-2.5 rounded-md hover:bg-orange-700 transition"
               >
                 View Details & Apply
               </button>
@@ -238,12 +266,12 @@ const Volunteer = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden max-h-[90vh] flex flex-col">
             
-            <div className="bg-teal-700 p-6 text-white flex justify-between items-start">
+            <div className="bg-orange-700 p-6 text-white flex justify-between items-start">
               <div>
-                <span className="bg-teal-600 px-2 py-1 rounded text-xs font-bold mb-3 inline-block">{selectedOpp.category}</span>
+                <span className="bg-orange-600 px-2 py-1 rounded text-xs font-bold mb-3 inline-block">{selectedOpp.category}</span>
                 <h3 className="text-2xl font-bold leading-tight">{selectedOpp.title}</h3>
               </div>
-              <button onClick={() => setSelectedOpp(null)} className="text-teal-200 hover:text-white p-1">
+              <button onClick={() => setSelectedOpp(null)} className="text-orange-200 hover:text-white p-1">
                 <FaTimes size={24} />
               </button>
             </div>
@@ -252,7 +280,7 @@ const Volunteer = () => {
               <h4 className="text-lg font-bold text-gray-900 mb-2">About this Role</h4>
               <p className="text-gray-600 mb-6 whitespace-pre-line">{selectedOpp.description}</p>
               
-              <div className="bg-gray-50 rounded-lg p-5 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 border border-gray-100">
+              <div className="bg-stone-50 rounded-lg p-5 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 border border-gray-100">
                 <div>
                   <p className="text-xs text-gray-500 uppercase font-bold">Organizer Info</p>
                   <p className="text-sm font-medium text-gray-900">Hope Foundation NGO</p>
@@ -277,11 +305,11 @@ const Volunteer = () => {
               </div>
             </div>
 
-            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+            <div className="p-6 border-t border-gray-100 bg-stone-50 flex justify-end">
               <button onClick={() => setSelectedOpp(null)} className="px-6 py-2 text-gray-600 font-bold mr-4 hover:text-gray-900">Cancel</button>
               <button 
                 onClick={() => handleApply(selectedOpp._id)}
-                className="bg-teal-600 text-white px-8 py-3 rounded-md font-bold shadow-md hover:bg-teal-700 hover:shadow-lg transition transform hover:-translate-y-0.5"
+                className="bg-orange-600 text-white px-8 py-3 rounded-md font-bold shadow-md hover:bg-orange-700 hover:shadow-lg transition transform hover:-translate-y-0.5"
               >
                 Apply Now
               </button>
