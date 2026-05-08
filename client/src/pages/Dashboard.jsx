@@ -1,11 +1,11 @@
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import axios from 'axios';// API requests to backend
 import { AuthContext } from '../context/AuthContext';
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion';// animations 
 
 const Dashboard = () => {
   const { user, updateProfile } = useContext(AuthContext);
-  const [activeTab, setActiveTab] = useState('recommendations');
+  const [activeTab, setActiveTab] = useState('recommendations');//default tab 
   const [data, setData] = useState({
     donations: [],
     applications: [],
@@ -24,16 +24,16 @@ const Dashboard = () => {
   });
 
   // Sync profile form when user object is available
-  useEffect(() => {
+  useEffect(() => {//automatically fill using logged-in userdata
     if (user) {
       setProfileForm({
-        name: user.name || '',
+        name: user.name || '',//Use user name or empty string if undefined
         email: user.email || '',
         phoneNumber: user.phoneNumber || '',
         location: user.location || '',
         bloodGroup: user.bloodGroup || '',
         skills: user.skills?.join(', ') || '',
-        interests: user.interests?.join(', ') || '',
+        interests: user.interests?.join(', ') || '',// Convert interests array into comma-separated string
         experience: user.experience || '',
         resume: user.resume || '',
       });
@@ -43,22 +43,22 @@ const Dashboard = () => {
   const [profileMsg, setProfileMsg] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const isProfileComplete = user?.skills?.length > 0 || user?.interests?.length > 0 || user?.bloodGroup || user?.experience;
+  const isProfileComplete = user?.skills?.length > 0 || user?.interests?.length > 0 || user?.bloodGroup || user?.experience;//enable AI recommendations
 
-  useEffect(() => {
+  useEffect(() => {//fetch data from backend
     const fetchDashboardData = async () => {
-      if (!user) return;
+      if (!user) return;//stop if no logged in user
       
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
         
-        const [donationsRes, appsRes, recsRes] = await Promise.all([
+        const [donationsRes, appsRes, recsRes] = await Promise.all([//fetch all api
           axios.get('http://localhost:5001/api/donations/me', config).catch(() => ({ data: [] })),
           axios.get('http://localhost:5001/api/volunteer/me', config).catch(() => ({ data: [] })),
           axios.get('http://localhost:5001/api/recommendations', config).catch(() => ({ data: [] }))
         ]);
 
-        setData({
+        setData({//save
           donations: donationsRes.data,
           applications: appsRes.data,
           recommendations: recsRes.data
@@ -71,14 +71,14 @@ const Dashboard = () => {
     };
 
     fetchDashboardData();
-  }, [user]);
+  }, [user]);//user changes
 
-  const handleProfileUpdate = async (e) => {
+  const handleProfileUpdate = async (e) => {//fn trigger when pf is sub
     e.preventDefault();
     setProfileMsg('Updating...');
     const formattedData = {
       ...profileForm,
-      skills: profileForm.skills.split(',').map(s => s.trim()).filter(s => s),
+      skills: profileForm.skills.split(',').map(s => s.trim()).filter(s => s),//conv str>>arry
       interests: profileForm.interests.split(',').map(s => s.trim()).filter(s => s),
     };
     const result = await updateProfile(formattedData);
@@ -86,7 +86,7 @@ const Dashboard = () => {
       setProfileMsg('Profile updated successfully!');
       setTimeout(() => setProfileMsg(''), 3000);
     } else {
-      setProfileMsg(result.message);
+      setProfileMsg(result.message);//error msg back
     }
   };
 
@@ -131,7 +131,7 @@ const Dashboard = () => {
             <div>
               {!isProfileComplete ? (
                 <div className="bg-white rounded-xl shadow p-10 text-center border-t-4 border-amber-500">
-                  <div className="text-6xl mb-4">🤖</div>
+                  <div className="text-6xl mb-4">.</div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">Unlock AI Recommendations</h2>
                   <p className="text-gray-600 mb-6 max-w-lg mx-auto">
                     To provide you with the most personalized campaign and volunteering recommendations, our AI needs to know a little bit more about you.
